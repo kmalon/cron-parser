@@ -1,5 +1,8 @@
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 
 class CronParserTest {
@@ -124,4 +127,53 @@ class CronParserTest {
             testConsolePrinter.printedContent
         )
     }
+
+    @ParameterizedTest
+    @EnumSource(WrongSeparatorsScenario::class)
+    fun `should throw exception when arguments are incorrect`(scenario: WrongSeparatorsScenario) {
+        //given
+        val inputArgs: Array<String> =
+            arrayOf("${scenario.minute} ${scenario.hour} ${scenario.dayOfMonth} ${scenario.month} ${scenario.dayOfWeek} /path/command")
+        val testConsolePrinter = TestConsolePrinter()
+        val cronParser = CronParserFactory.create(printer = testConsolePrinter)
+
+        //when
+        assertThrows<UnrecognizedArgumentException> {
+            cronParser.parseAndPrint(inputArgs)
+        }
+    }
+}
+
+enum class WrongSeparatorsScenario(
+    val minute: String,
+    val hour: String,
+    val dayOfMonth: String,
+    val month: String,
+    val dayOfWeek: String
+) {
+    MINUTE_WITH_SLASH("*/1/2", "*", "*", "*", "*"),
+    HOUR_WITH_SLASH("*", "/1/2", "*", "*", "*"),
+    DAY_OF_MONTH_WITH_SLASH("*", "*", "/1/2", "*", "*"),
+    MONTH_WITH_SLASH("*", "*", "*", "/1/2", "*"),
+    DAY_OF_WEEK_WITH_SLASH("*", "*", "*", "*", "/1/2"),
+    MINUTE_WITH_DASH("1-3-5", "*", "*", "*", "*"),
+    HOUR_WITH_DASH("*", "1-3-5", "*", "*", "*"),
+    DAY_OF_MONTH_WITH_DASH("*", "*", "1-3-5", "*", "*"),
+    MONTH_WITH_DASH("*", "*", "*", "1-3-5", "*"),
+    DAY_OF_WEEK_WITH_DASH("*", "*", "*", "*", "1-3-5"),
+    MINUTE_WITH_COMMA_DASH("1,3-5", "*", "*", "*", "*"),
+    HOUR_WITH_COMMA_DASH("*", "1,3-5", "*", "*", "*"),
+    DAY_OF_MONTH_WITH_COMMA_DASH("*", "*", "1,3-5", "*", "*"),
+    MONTH_WITH_COMMA_DASH("*", "*", "*", "1,3-5", "*"),
+    DAY_OF_WEEK_WITH_COMMA_DASH("*", "*", "*", "*", "1,3-5"),
+    MINUTE_WITH_SLASH_DASH("1/3-5", "*", "*", "*", "*"),
+    HOUR_WITH_SLASH_DASH("*", "1/3-5", "*", "*", "*"),
+    DAY_OF_MONTH_WITH_SLASH_DASH("*", "*", "1/3-5", "*", "*"),
+    MONTH_WITH_SLASH_DASH("*", "*", "*", "1/3-5", "*"),
+    DAY_OF_WEEK_WITH_SLASH_DASH("*", "*", "*", "*", "1/3-5"),
+    MINUTE_WITH_COMA_SLASH("1,3-5", "*", "*", "*", "*"),
+    HOUR_WITH_COMA_SLASH("*", "1,3-5", "*", "*", "*"),
+    DAY_OF_MONTH_WITH_COMA_SLASH("*", "*", "1,3-5", "*", "*"),
+    MONTH_WITH_COMA_SLASH("*", "*", "*", "1,3-5", "*"),
+    DAY_OF_WEEK_WITH_COMA_SLASH("*", "*", "*", "*", "1,3-5"),
 }
