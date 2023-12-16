@@ -4,14 +4,14 @@ interface CronArgumentsParser {
 
 class StandardCronFormat {
     companion object {
-        val standardFormatRegex = "(.*) (.*) (.*) (.*) (.*) (.*)".toRegex()
+        val STANDARD_FORMAT_REGEX = "^([^\\s]+) ([^\\s]+) ([^\\s]+) ([^\\s]+) ([^\\s]+) ([^\\s]+)\$".toRegex()
     }
 
     fun isCorrectFormat(argument: RawParserArgument): Boolean =
-        standardFormatRegex.matches(argument.value)
+        STANDARD_FORMAT_REGEX.matches(argument.value)
 
     fun get(argument: RawParserArgument): List<String> =
-        standardFormatRegex.find(argument.value)?.groupValues?.drop(1) ?: throw NotFoundArgumentsException()
+        STANDARD_FORMAT_REGEX.find(argument.value)?.groupValues?.drop(1) ?: throw NotFoundArgumentsException()
 }
 
 class StandardCronParser(
