@@ -213,6 +213,7 @@ class SlashArgument(
         .toInt()
     private val values: List<String> = step
         .let { IntRange(minValue, (maxValue / it)) }
+        //todo
         .mapIndexed { index, argument ->
             index * step
         }
