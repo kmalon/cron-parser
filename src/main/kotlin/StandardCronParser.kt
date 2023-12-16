@@ -25,12 +25,12 @@ class StandardCronParser(
     }
 }
 
-enum class TimeArgumentType(val maxValue: Int, val occurrenceIndex: Int, val fullName: String) {
-    MINUTE(60, 0, "minute"),
-    HOUR(24, 1, "hour"),
-    DAY_OF_MONTH(31, 2, "day of month"),
-    MONTH(12, 3, "month"),
-    DAY_OF_WEEK(7, 4, "day of week");
+enum class TimeArgumentType(val minValue: Int, val maxValue: Int, val occurrenceIndex: Int, val fullName: String) {
+    MINUTE(0, 59, 0, "minute"),
+    HOUR(0, 23, 1, "hour"),
+    DAY_OF_MONTH(1, 31, 2, "day of month"),
+    MONTH(1, 12, 3, "month"),
+    DAY_OF_WEEK(0, 6, 4, "day of week");
 }
 
 enum class OtherArgumentType(val occurrenceIndex: Int, val fullName: String) {
@@ -45,21 +45,17 @@ class ArgumentFactory {
         val timeArguments =
             TimeArgumentType
                 .entries
-                .map { argumentType ->
-                    val parsedArgument = createTimeArgument(arguments[argumentType.occurrenceIndex], argumentType)
-                    argumentType to parsedArgument
+                .associateWith { argumentType ->
+                    createTimeArgument(arguments[argumentType.occurrenceIndex], argumentType)
                 }
-                .toMap()
                 .let(::ParsedTimeArguments)
 
         val otherArguments =
             OtherArgumentType
                 .entries
-                .map { argumentType ->
-                    val parsedArgument = createOtherArgument(arguments[argumentType.occurrenceIndex])
-                    argumentType to parsedArgument
+                .associateWith { argumentType ->
+                    createOtherArgument(arguments[argumentType.occurrenceIndex])
                 }
-                .toMap()
                 .let(::ParsedOtherArguments)
 
         return ParsedArguments(timeArguments, otherArguments)
@@ -67,16 +63,23 @@ class ArgumentFactory {
 
     private fun createTimeArgument(argument: String, timeArgumentType: TimeArgumentType): Argument =
         when {
-            NumberArgument.isEligibleFor(argument, timeArgumentType.maxValue) -> NumberArgument(argument)
-            StarArgument.isEligibleFor(argument) -> StarArgument(timeArgumentType.maxValue)
-            CommaArgument.isEligibleFor(argument, timeArgumentType.maxValue) -> CommaArgument(argument)
-            SlashArgument.isEligibleFor(argument, timeArgumentType.maxValue) -> SlashArgument(
-                argument,
-                timeArgumentType.maxValue
-            )
+            NumberArgument.isEligibleFor(argument, timeArgumentType.minValue, timeArgumentType.maxValue) ->
+                NumberArgument(argument)
 
-            DashNumberArgument.isEligibleFor(argument, timeArgumentType.maxValue) -> DashNumberArgument(argument)
-            else -> throw UnrecognizedArgumentException(argument)
+            StarArgument.isEligibleFor(argument) ->
+                StarArgument(timeArgumentType.minValue, timeArgumentType.maxValue)
+
+            CommaArgument.isEligibleFor(argument, timeArgumentType.minValue, timeArgumentType.maxValue) ->
+                CommaArgument(argument)
+
+            SlashArgument.isEligibleFor(argument, timeArgumentType.minValue, timeArgumentType.maxValue) ->
+                SlashArgument(argument, timeArgumentType.maxValue)
+
+            DashNumberArgument.isEligibleFor(argument, timeArgumentType.minValue, timeArgumentType.maxValue) ->
+                DashNumberArgument(argument)
+
+            else ->
+                throw UnrecognizedArgumentException(argument)
 
         }
 
@@ -86,11 +89,6 @@ class ArgumentFactory {
             else -> throw UnrecognizedArgumentException(argument)
         }
 }
-
-data class ParsedArgument(
-    val argument: Argument,
-    val argumentName: String,
-)
 
 data class ParsedTimeArguments(
     val value: Map<TimeArgumentType, Argument>
@@ -118,15 +116,16 @@ class NumberArgument(
         values
 
     companion object {
-        fun isEligibleFor(argument: String, maxValue: Int): Boolean =
-            argument.toIntOrNull() != null && argument.toInt() <= maxValue
+        fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean =
+            argument.toIntOrNull() != null && argument.toInt() in minValue..maxValue
     }
 }
 
 class StarArgument(
+    minValue: Int,
     maxValue: Int,
 ) : Argument {
-    private val values: List<String> = IntRange(0, maxValue).map { it.toString() }
+    private val values: List<String> = IntRange(minValue, maxValue).map { it.toString() }
     override fun getValues(): List<String> =
         values
 
@@ -148,9 +147,9 @@ class CommaArgument(
     companion object {
         const val COMMA: String = ","
 
-        fun isEligibleFor(argument: String, maxValue: Int): Boolean {
+        fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean {
             val arguments: List<String> = argument.split(COMMA)
-            return argument.contains(COMMA) && hasExactlyOneComma(arguments) && arguments[0].toInt() <= maxValue && arguments[1].toInt() <= maxValue
+            return argument.contains(COMMA) && hasExactlyOneComma(arguments) && arguments[0].toInt() in minValue..maxValue && arguments[1].toInt() in minValue..maxValue
         }
 
         private fun hasExactlyOneComma(arguments: List<String>) = arguments.size == 2
@@ -174,14 +173,14 @@ class DashNumberArgument(
     companion object {
         const val DASH: String = "-"
 
-        fun isEligibleFor(argument: String, maxValue: Int): Boolean {
+        fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean {
             val arguments: List<String> = argument.split(DASH)
             return argument.contains(DASH)
                     && hasExactlyOneDash(arguments)
                     && argumentsAreNumbers(arguments)
                     && secondNumberIsBigger(arguments)
-                    && arguments[0].toInt() <= maxValue
-                    && arguments[1].toInt() <= maxValue
+                    && arguments[0].toInt() in minValue..maxValue
+                    && arguments[1].toInt() in minValue..maxValue
         }
 
         private fun hasExactlyOneDash(arguments: List<String>) = arguments.size == 2
@@ -217,13 +216,13 @@ class SlashArgument(
     companion object {
         const val SLASH: String = "/"
 
-        fun isEligibleFor(argument: String, maxValue: Int): Boolean {
+        fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean {
             val arguments: List<String> = argument.split(SLASH)
             return argument.contains(SLASH)
                     && hasExactlyOneSlash(arguments)
                     && secondArgumentIsNumber(arguments[1])
                     && firstArgumentIsStar(arguments[0])
-                    && arguments[1].toInt() <= maxValue
+                    && arguments[1].toInt() in minValue..maxValue
         }
 
         private fun hasExactlyOneSlash(arguments: List<String>): Boolean = arguments.size == 2
