@@ -3,7 +3,9 @@ import mu.KotlinLogging
 fun main(args: Array<String>) {
     LOGGER.logger.info("\nProgram arguments: ${args.joinToString()}\n\n")
 
-    CronParser().parseAndPrint(args)
+    CronParserFactory
+        .create()
+        .parseAndPrint(args)
 }
 
 object LOGGER {
