@@ -155,6 +155,8 @@ class CommaArgument(
     companion object {
         const val COMMA: String = ","
         private val ONLY_COMMA_REGEX = "[^0-9,\\s]".toRegex()
+        private val START_WITH_COMMA_REGEX = "^[^,.*]".toRegex()
+        private val END_WITH_COMMA_REGEX = "[^.*,]\$".toRegex()
 
         fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean {
             val arguments: List<String> = argument.split(COMMA)
@@ -165,6 +167,8 @@ class CommaArgument(
 
         private fun String.hasOnlyCommaAndDigits() =
             !this.contains(ONLY_COMMA_REGEX)
+                .or(!this.contains(START_WITH_COMMA_REGEX))
+                .or(!this.contains(END_WITH_COMMA_REGEX))
     }
 }
 
