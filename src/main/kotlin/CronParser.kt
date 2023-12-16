@@ -1,10 +1,11 @@
 class CronParser(
     private val cronFormatRecognizer: CronFormatRecognizer = CronFormatRecognizer(),
-    //cron printer
+    private val cronPrinter: CronPrinter = ConsolePrinter(),
 ) {
     fun parseAndPrint(args: Array<String>) {
         val arguments = args.let(::RawParserArgument)
-        cronFormatRecognizer.getParser(arguments).parseFor(arguments)
+        val parsedArguments = cronFormatRecognizer.getParser(arguments).parseFor(arguments)
+        cronPrinter.print(parsedArguments)
     }
 }
 

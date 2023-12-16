@@ -73,7 +73,7 @@ class ArgumentFactory {
                 CommaArgument(argument)
 
             SlashArgument.isEligibleFor(argument, timeArgumentType.minValue, timeArgumentType.maxValue) ->
-                SlashArgument(argument, timeArgumentType.maxValue)
+                SlashArgument(argument, timeArgumentType.minValue, timeArgumentType.maxValue)
 
             DashNumberArgument.isEligibleFor(argument, timeArgumentType.minValue, timeArgumentType.maxValue) ->
                 DashNumberArgument(argument)
@@ -101,7 +101,15 @@ data class ParsedOtherArguments(
 data class ParsedArguments(
     val timeArguments: ParsedTimeArguments,
     val otherArguments: ParsedOtherArguments,
-)
+) {
+    //TODO exception test
+    fun getFor(timeArgumentType: TimeArgumentType): Argument =
+        timeArguments.value[timeArgumentType] ?: throw NotFoundTimeArgumentException(timeArgumentType)
+
+    //TODO exception test
+    fun getFor(otherArgumentType: OtherArgumentType): Argument =
+        otherArguments.value[otherArgumentType] ?: throw NotFoundOtherArgumentException(otherArgumentType)
+}
 
 interface Argument {
     fun getValues(): List<String>
@@ -197,13 +205,14 @@ class DashNumberArgument(
 
 class SlashArgument(
     value: String,
-    maxValue: Int
+    minValue: Int,
+    maxValue: Int,
 ) : Argument {
     private val step: Int = value
         .split(SLASH)[1]
         .toInt()
     private val values: List<String> = step
-        .let { IntRange(0, (maxValue / it) - 1) }
+        .let { IntRange(minValue, (maxValue / it)) }
         .mapIndexed { index, argument ->
             index * step
         }
@@ -255,4 +264,16 @@ class UnrecognizedArgumentException(
     ParserException(message)
 
 class NotFoundArgumentsException(message: String = "Can not found any arguments in provided application invitation") :
+    ParserException(message)
+
+class NotFoundTimeArgumentException(
+    argumentType: TimeArgumentType,
+    message: String = "Can not found parsed argument for: ${argumentType.fullName}"
+) :
+    ParserException(message)
+
+class NotFoundOtherArgumentException(
+    otherArgumentType: OtherArgumentType,
+    message: String = "Can not found parsed argument for: ${otherArgumentType.fullName}"
+) :
     ParserException(message)
