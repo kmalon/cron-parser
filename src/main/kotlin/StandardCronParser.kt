@@ -154,11 +154,17 @@ class CommaArgument(
 
     companion object {
         const val COMMA: String = ","
+        private val ONLY_COMMA_REGEX = "[^0-9,\\s]".toRegex()
 
         fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean {
             val arguments: List<String> = argument.split(COMMA)
-            return argument.contains(COMMA) && arguments[0].toInt() in minValue..maxValue && arguments[1].toInt() in minValue..maxValue
+            return argument.hasOnlyCommaAndDigits()
+                    && arguments[0].toInt() in minValue..maxValue
+                    && arguments[1].toInt() in minValue..maxValue
         }
+
+        private fun String.hasOnlyCommaAndDigits() =
+            !this.contains(ONLY_COMMA_REGEX)
     }
 }
 
@@ -178,25 +184,28 @@ class DashNumberArgument(
 
     companion object {
         const val DASH: String = "-"
+        private val DASH_REGEX = "^[0-9]+${DASH}[0-9]+$".toRegex()
 
         fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean {
-            val arguments: List<String> = argument.split(DASH)
-            return argument.contains(DASH)
-                    && hasExactlyOneDash(arguments)
-                    && argumentsAreNumbers(arguments)
-                    && secondNumberIsBigger(arguments)
-                    && arguments[0].toInt() in minValue..maxValue
-                    && arguments[1].toInt() in minValue..maxValue
+            val splitArguments: List<String> = argument.split(DASH)
+            return argument.hasOnlyDashAndDigits()
+                    && isRangeCorrect(splitArguments[0], splitArguments[1], minValue, maxValue)
         }
 
-        private fun hasExactlyOneDash(arguments: List<String>) = arguments.size == 2
+        private fun String.hasOnlyDashAndDigits(): Boolean =
+            this.contains(DASH_REGEX)
 
-        private fun argumentsAreNumbers(arguments: List<String>) =
-            arguments.filter { it.toIntOrNull() != null }.size == 2
-
-        private fun secondNumberIsBigger(arguments: List<String>): Boolean {
-            val numbersArguments = arguments.map { it.toInt() }
-            return numbersArguments[0] < numbersArguments[1]
+        private fun isRangeCorrect(
+            beforeDash: String,
+            afterDash: String,
+            minValue: Int,
+            maxValue: Int
+        ): Boolean {
+            val beforeDashNumber = beforeDash.toInt()
+            val afterDashNumber = afterDash.toInt()
+            return beforeDashNumber <= afterDashNumber
+                    && beforeDashNumber in minValue..maxValue
+                    && afterDashNumber in minValue..maxValue
         }
     }
 }
@@ -221,21 +230,16 @@ class SlashArgument(
 
     companion object {
         const val SLASH: String = "/"
+        private val SLASH_REGEX = "^\\*${SLASH}[0-9]+$".toRegex()
 
         fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean {
-            val arguments: List<String> = argument.split(SLASH)
-            return argument.contains(SLASH)
-                    && hasExactlyOneSlash(arguments)
-                    && secondArgumentIsNumber(arguments[1])
-                    && firstArgumentIsStar(arguments[0])
-                    && arguments[1].toInt() in minValue..maxValue
+            return argument
+                .hasOnlySlashAndDigits()
+                    && argument.split(SLASH)[1].toInt() in minValue..maxValue
         }
 
-        private fun hasExactlyOneSlash(arguments: List<String>): Boolean = arguments.size == 2
-
-        private fun firstArgumentIsStar(argument: String): Boolean = argument == "*"
-
-        private fun secondArgumentIsNumber(argument: String): Boolean = argument.toIntOrNull() != null
+        private fun String.hasOnlySlashAndDigits(): Boolean =
+            this.contains(SLASH_REGEX)
     }
 }
 
