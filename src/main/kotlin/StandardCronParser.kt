@@ -209,13 +209,11 @@ class SlashArgument(
     private val step: Int = value
         .split(SLASH)[1]
         .toInt()
-    private val values: List<String> = step
-        .let { IntRange(minValue, (maxValue / it)) }
-        //todo
-        .mapIndexed { index, argument ->
-            index * step
-        }
-        .map { it.toString() }
+    private val values: List<String> =
+        IntRange(minValue, maxValue / step)
+            .runningFold(minValue) { acc, _ -> acc + step }
+            .takeWhile { it <= maxValue }
+            .map { it.toString() }
 
 
     override fun getValues(): List<String> =
