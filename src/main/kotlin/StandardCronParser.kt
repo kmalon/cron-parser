@@ -1,5 +1,5 @@
 interface CronArgumentsParser {
-    fun parseFor(argument: RawParserArgument): List<ParsedArgument>
+    fun parseFor(argument: RawParserArgument): ParsedArguments
 }
 
 class StandardCronFormat {
@@ -12,7 +12,6 @@ class StandardCronFormat {
 
     fun get(argument: RawParserArgument): List<String> =
         standardFormatRegex.find(argument.value)?.groupValues?.drop(1) ?: throw NotFoundArgumentsException()
-
 }
 
 class StandardCronParser(
@@ -20,42 +19,50 @@ class StandardCronParser(
     private val argumentFactory: ArgumentFactory = ArgumentFactory(),
 ) : CronArgumentsParser {
 
-    override fun parseFor(argument: RawParserArgument): List<ParsedArgument> {
+    override fun parseFor(argument: RawParserArgument): ParsedArguments {
         val arguments = standardCronFormat.get(argument)
         return argumentFactory.createFrom(arguments)
     }
 }
 
-enum class TimeArgumentType(val maxValue: Int, val fullName: String) {
-    MINUTE(60, "minute"),
-    HOUR(24, "hour"),
-    DAY_OF_MONTH(31, "day of month"),
-    MONTH(12, "month"),
-    DAY_OF_WEEK(7, "day of week");
+enum class TimeArgumentType(val maxValue: Int, val occurrenceIndex: Int, val fullName: String) {
+    MINUTE(60, 0, "minute"),
+    HOUR(24, 1, "hour"),
+    DAY_OF_MONTH(31, 2, "day of month"),
+    MONTH(12, 3, "month"),
+    DAY_OF_WEEK(7, 4, "day of week");
 }
 
-enum class OtherArgumentType(val fullName: String) {
-    COMMAND("command")
+enum class OtherArgumentType(val occurrenceIndex: Int, val fullName: String) {
+    COMMAND(5, "command");
 }
 
 
 class ArgumentFactory {
     fun createFrom(
         arguments: List<String>
-    ): List<ParsedArgument> {
+    ): ParsedArguments {
         val timeArguments =
-            arguments
-                .dropLast(1)
-                .mapIndexed { index, argument ->
-                    createTimeArgument(argument, TimeArgumentType.entries[index])
-                        .let { ParsedArgument(it, TimeArgumentType.entries[index].fullName) }
+            TimeArgumentType
+                .entries
+                .map { argumentType ->
+                    val parsedArgument = createTimeArgument(arguments[argumentType.occurrenceIndex], argumentType)
+                    argumentType to parsedArgument
                 }
+                .toMap()
+                .let(::ParsedTimeArguments)
 
         val otherArguments =
-            createOtherArgument(arguments.last())
-                .let { ParsedArgument(it, OtherArgumentType.COMMAND.fullName) }
+            OtherArgumentType
+                .entries
+                .map { argumentType ->
+                    val parsedArgument = createOtherArgument(arguments[argumentType.occurrenceIndex])
+                    argumentType to parsedArgument
+                }
+                .toMap()
+                .let(::ParsedOtherArguments)
 
-        return timeArguments + otherArguments
+        return ParsedArguments(timeArguments, otherArguments)
     }
 
     private fun createTimeArgument(argument: String, timeArgumentType: TimeArgumentType): Argument =
@@ -80,9 +87,22 @@ class ArgumentFactory {
         }
 }
 
-class ParsedArgument(
+data class ParsedArgument(
     val argument: Argument,
     val argumentName: String,
+)
+
+data class ParsedTimeArguments(
+    val value: Map<TimeArgumentType, Argument>
+)
+
+data class ParsedOtherArguments(
+    val value: Map<OtherArgumentType, Argument>
+)
+
+data class ParsedArguments(
+    val timeArguments: ParsedTimeArguments,
+    val otherArguments: ParsedOtherArguments,
 )
 
 interface Argument {
