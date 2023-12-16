@@ -134,76 +134,96 @@ class CronParserTest {
         //given
         val inputArgs: Array<String> =
             arrayOf("${scenario.minute} ${scenario.hour} ${scenario.dayOfMonth} ${scenario.month} ${scenario.dayOfWeek} /path/command")
-        val testConsolePrinter = TestConsolePrinter()
-        val cronParser = CronParserFactory.create(printer = testConsolePrinter)
+        val cronParser = CronParserFactory.create()
 
-        //when
+        //expect
         assertThrows<UnrecognizedArgumentException> {
             cronParser.parseAndPrint(inputArgs)
         }
     }
-}
 
-enum class WrongSeparatorsScenario(
-    val minute: String,
-    val hour: String,
-    val dayOfMonth: String,
-    val month: String,
-    val dayOfWeek: String
-) {
-    MINUTE_WITH_DOUBLED_SLASH("*/1/2", "*", "*", "*", "*"),
-    HOUR_WITH_DOUBLED_SLASH("*", "*/1/2", "*", "*", "*"),
-    DAY_OF_MONTH_WITH_DOUBLED_SLASH("*", "*", "*/1/2", "*", "*"),
-    MONTH_WITH_DOUBLED_SLASH("*", "*", "*", "*/1/2", "*"),
-    DAY_OF_WEEK_WITH_DOUBLED_SLASH("*", "*", "*", "*", "*/1/2"),
-    MINUTE_WITH_DOUBLED_DASH("1-3-5", "*", "*", "*", "*"),
-    HOUR_WITH_DOUBLED_DASH("*", "1-3-5", "*", "*", "*"),
-    DAY_OF_MONTH_WITH_DOUBLED_DASH("*", "*", "1-3-5", "*", "*"),
-    MONTH_WITH_DOUBLED_DASH("*", "*", "*", "1-3-5", "*"),
-    DAY_OF_WEEK_WITH_DOUBLED_DASH("*", "*", "*", "*", "1-3-5"),
-    MINUTE_WITH_COMMA_DASH("1,3-5", "*", "*", "*", "*"),
-    HOUR_WITH_COMMA_DASH("*", "1,3-5", "*", "*", "*"),
-    DAY_OF_MONTH_WITH_COMMA_DASH("*", "*", "1,3-5", "*", "*"),
-    MONTH_WITH_COMMA_DASH("*", "*", "*", "1,3-5", "*"),
-    DAY_OF_WEEK_WITH_COMMA_DASH("*", "*", "*", "*", "1,3-5"),
-    MINUTE_WITH_SLASH_DASH("1/3-5", "*", "*", "*", "*"),
-    HOUR_WITH_SLASH_DASH("*", "1/3-5", "*", "*", "*"),
-    DAY_OF_MONTH_WITH_SLASH_DASH("*", "*", "1/3-5", "*", "*"),
-    MONTH_WITH_SLASH_DASH("*", "*", "*", "1/3-5", "*"),
-    DAY_OF_WEEK_WITH_SLASH_DASH("*", "*", "*", "*", "1/3-5"),
-    MINUTE_WITH_COMA_SLASH("1,3-5", "*", "*", "*", "*"),
-    HOUR_WITH_COMA_SLASH("*", "1,3-5", "*", "*", "*"),
-    DAY_OF_MONTH_WITH_COMA_SLASH("*", "*", "1,3-5", "*", "*"),
-    MONTH_WITH_COMA_SLASH("*", "*", "*", "1,3-5", "*"),
-    DAY_OF_WEEK_WITH_COMA_SLASH("*", "*", "*", "*", "1,3-5"),
-    MINUTE_STARTED_FROM_SLASH("/1", "*", "*", "*", "*"),
-    HOUR_STARTED_FROM_SLASH("*", "/1", "*", "*", "*"),
-    DAY_OF_MONTH_STARTED_FROM_SLASH("*", "*", "/1", "*", "*"),
-    MONTH_STARTED_FROM_SLASH("*", "*", "*", "/1", "*"),
-    DAY_OF_WEEK_STARTED_FROM_SLASH("*", "*", "*", "*", "/1"),
-    MINUTE_STARTED_FROM_COMMA(",1", "*", "*", "*", "*"),
-    HOUR_STARTED_FROM_COMMA("*", ",1", "*", "*", "*"),
-    DAY_OF_MONTH_STARTED_FROM_COMMA("*", "*", ",1", "*", "*"),
-    MONTH_STARTED_FROM_COMMA("*", "*", "*", ",1", "*"),
-    DAY_OF_WEEK_STARTED_FROM_COMMA("*", "*", "*", "*", ",1"),
-    MINUTE_STARTED_FROM_DASH("-1", "*", "*", "*", "*"),
-    HOUR_STARTED_FROM_DASH("*", "-1", "*", "*", "*"),
-    DAY_OF_MONTH_STARTED_FROM_DASH("*", "*", "-1", "*", "*"),
-    MONTH_STARTED_FROM_DASH("*", "*", "*", "-1", "*"),
-    DAY_OF_WEEK_STARTED_FROM_DASH("*", "*", "*", "*", "-1"),
-    MINUTE_ENDED_WITH_DASH("1-", "*", "*", "*", "*"),
-    HOUR_ENDED_WITH_DASH("*", "1-", "*", "*", "*"),
-    DAY_OF_MONTH_ENDED_WITH_DASH("*", "*", "1-", "*", "*"),
-    MONTH_ENDED_WITH_DASH("*", "*", "*", "1-", "*"),
-    DAY_OF_WEEK_ENDED_WITH_DASH("*", "*", "*", "*", "1-"),
-    MINUTE_ENDED_WITH_COMMA("1,", "*", "*", "*", "*"),
-    HOUR_ENDED_WITH_COMMA("*", "1,", "*", "*", "*"),
-    DAY_OF_MONTH_ENDED_WITH_COMMA("*", "*", "1,", "*", "*"),
-    MONTH_ENDED_WITH_COMMA("*", "*", "*", "1,", "*"),
-    DAY_OF_WEEK_ENDED_WITH_COMMA("*", "*", "*", "*", "1,"),
-    MINUTE_ENDED_WITH_SLASH("1/", "*", "*", "*", "*"),
-    HOUR_ENDED_WITH_SLASH("*", "1/", "*", "*", "*"),
-    DAY_OF_MONTH_ENDED_WITH_SLASH("*", "*", "1/", "*", "*"),
-    MONTH_ENDED_WITH_SLASH("*", "*", "*", "1/", "*"),
-    DAY_OF_WEEK_ENDED_WITH_SLASH("*", "*", "*", "*", "1/"),
+    enum class WrongSeparatorsScenario(
+        val minute: String,
+        val hour: String,
+        val dayOfMonth: String,
+        val month: String,
+        val dayOfWeek: String
+    ) {
+        MINUTE_WITH_DOUBLED_SLASH("*/1/2", "*", "*", "*", "*"),
+        HOUR_WITH_DOUBLED_SLASH("*", "*/1/2", "*", "*", "*"),
+        DAY_OF_MONTH_WITH_DOUBLED_SLASH("*", "*", "*/1/2", "*", "*"),
+        MONTH_WITH_DOUBLED_SLASH("*", "*", "*", "*/1/2", "*"),
+        DAY_OF_WEEK_WITH_DOUBLED_SLASH("*", "*", "*", "*", "*/1/2"),
+        MINUTE_WITH_DOUBLED_DASH("1-3-5", "*", "*", "*", "*"),
+        HOUR_WITH_DOUBLED_DASH("*", "1-3-5", "*", "*", "*"),
+        DAY_OF_MONTH_WITH_DOUBLED_DASH("*", "*", "1-3-5", "*", "*"),
+        MONTH_WITH_DOUBLED_DASH("*", "*", "*", "1-3-5", "*"),
+        DAY_OF_WEEK_WITH_DOUBLED_DASH("*", "*", "*", "*", "1-3-5"),
+        MINUTE_WITH_COMMA_DASH("1,3-5", "*", "*", "*", "*"),
+        HOUR_WITH_COMMA_DASH("*", "1,3-5", "*", "*", "*"),
+        DAY_OF_MONTH_WITH_COMMA_DASH("*", "*", "1,3-5", "*", "*"),
+        MONTH_WITH_COMMA_DASH("*", "*", "*", "1,3-5", "*"),
+        DAY_OF_WEEK_WITH_COMMA_DASH("*", "*", "*", "*", "1,3-5"),
+        MINUTE_WITH_SLASH_DASH("1/3-5", "*", "*", "*", "*"),
+        HOUR_WITH_SLASH_DASH("*", "1/3-5", "*", "*", "*"),
+        DAY_OF_MONTH_WITH_SLASH_DASH("*", "*", "1/3-5", "*", "*"),
+        MONTH_WITH_SLASH_DASH("*", "*", "*", "1/3-5", "*"),
+        DAY_OF_WEEK_WITH_SLASH_DASH("*", "*", "*", "*", "1/3-5"),
+        MINUTE_WITH_COMA_SLASH("1,3-5", "*", "*", "*", "*"),
+        HOUR_WITH_COMA_SLASH("*", "1,3-5", "*", "*", "*"),
+        DAY_OF_MONTH_WITH_COMA_SLASH("*", "*", "1,3-5", "*", "*"),
+        MONTH_WITH_COMA_SLASH("*", "*", "*", "1,3-5", "*"),
+        DAY_OF_WEEK_WITH_COMA_SLASH("*", "*", "*", "*", "1,3-5"),
+        MINUTE_STARTED_FROM_SLASH("/1", "*", "*", "*", "*"),
+        HOUR_STARTED_FROM_SLASH("*", "/1", "*", "*", "*"),
+        DAY_OF_MONTH_STARTED_FROM_SLASH("*", "*", "/1", "*", "*"),
+        MONTH_STARTED_FROM_SLASH("*", "*", "*", "/1", "*"),
+        DAY_OF_WEEK_STARTED_FROM_SLASH("*", "*", "*", "*", "/1"),
+        MINUTE_STARTED_FROM_COMMA(",1", "*", "*", "*", "*"),
+        HOUR_STARTED_FROM_COMMA("*", ",1", "*", "*", "*"),
+        DAY_OF_MONTH_STARTED_FROM_COMMA("*", "*", ",1", "*", "*"),
+        MONTH_STARTED_FROM_COMMA("*", "*", "*", ",1", "*"),
+        DAY_OF_WEEK_STARTED_FROM_COMMA("*", "*", "*", "*", ",1"),
+        MINUTE_STARTED_FROM_DASH("-1", "*", "*", "*", "*"),
+        HOUR_STARTED_FROM_DASH("*", "-1", "*", "*", "*"),
+        DAY_OF_MONTH_STARTED_FROM_DASH("*", "*", "-1", "*", "*"),
+        MONTH_STARTED_FROM_DASH("*", "*", "*", "-1", "*"),
+        DAY_OF_WEEK_STARTED_FROM_DASH("*", "*", "*", "*", "-1"),
+        MINUTE_ENDED_WITH_DASH("1-", "*", "*", "*", "*"),
+        HOUR_ENDED_WITH_DASH("*", "1-", "*", "*", "*"),
+        DAY_OF_MONTH_ENDED_WITH_DASH("*", "*", "1-", "*", "*"),
+        MONTH_ENDED_WITH_DASH("*", "*", "*", "1-", "*"),
+        DAY_OF_WEEK_ENDED_WITH_DASH("*", "*", "*", "*", "1-"),
+        MINUTE_ENDED_WITH_COMMA("1,", "*", "*", "*", "*"),
+        HOUR_ENDED_WITH_COMMA("*", "1,", "*", "*", "*"),
+        DAY_OF_MONTH_ENDED_WITH_COMMA("*", "*", "1,", "*", "*"),
+        MONTH_ENDED_WITH_COMMA("*", "*", "*", "1,", "*"),
+        DAY_OF_WEEK_ENDED_WITH_COMMA("*", "*", "*", "*", "1,"),
+        MINUTE_ENDED_WITH_SLASH("1/", "*", "*", "*", "*"),
+        HOUR_ENDED_WITH_SLASH("*", "1/", "*", "*", "*"),
+        DAY_OF_MONTH_ENDED_WITH_SLASH("*", "*", "1/", "*", "*"),
+        MONTH_ENDED_WITH_SLASH("*", "*", "*", "1/", "*"),
+        DAY_OF_WEEK_ENDED_WITH_SLASH("*", "*", "*", "*", "1/"),
+    }
+
+    @ParameterizedTest
+    @EnumSource(WrongInputArgumentFormat::class)
+    fun `should throw exception when input argument format is wrong`(scenario: WrongInputArgumentFormat) {
+        //given
+        val inputArgs: Array<String> = arrayOf(scenario.inputArgument)
+        val cronParser = CronParserFactory.create()
+
+        //expect
+        assertThrows<NotSupportedCronFormat> {
+            cronParser.parseAndPrint(inputArgs)
+        }
+    }
+
+    enum class WrongInputArgumentFormat(val inputArgument: String) {
+        MISSING_TIME_ARGUMENT("1 3 12 2 /path/command"),
+        MISSING_COMMAND_ARGUMENT("1 3 12 2"),
+        MISSING_COMMAND_ARGUMENT_("1 3 12 2 "),
+        EXTRA_TIME_ARGUMENT("1 3 12 2 1 2 /path/command"),
+        EXTRA_COMMAND_ARGUMENT("1 3 12 2 1 2 /path/command /path2/command"),
+    }
 }
