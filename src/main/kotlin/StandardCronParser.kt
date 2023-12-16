@@ -157,10 +157,8 @@ class CommaArgument(
 
         fun isEligibleFor(argument: String, minValue: Int, maxValue: Int): Boolean {
             val arguments: List<String> = argument.split(COMMA)
-            return argument.contains(COMMA) && hasExactlyOneComma(arguments) && arguments[0].toInt() in minValue..maxValue && arguments[1].toInt() in minValue..maxValue
+            return argument.contains(COMMA) && arguments[0].toInt() in minValue..maxValue && arguments[1].toInt() in minValue..maxValue
         }
-
-        private fun hasExactlyOneComma(arguments: List<String>) = arguments.size == 2
     }
 }
 
