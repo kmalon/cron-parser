@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.EnumSource
 class CronParserTest {
 
     @Test
-    fun `should parse correctly all arguments with star (*)`() {
+    fun `should parse correctly all arguments with star`() {
         //given
         val inputArgs: Array<String> = arrayOf("* * * * * /path/command")
         val testConsolePrinter = TestConsolePrinter()
@@ -225,5 +225,40 @@ class CronParserTest {
         MISSING_COMMAND_ARGUMENT_("1 3 12 2 "),
         EXTRA_TIME_ARGUMENT("1 3 12 2 1 2 /path/command"),
         EXTRA_COMMAND_ARGUMENT("1 3 12 2 1 2 /path/command /path2/command"),
+    }
+
+    @ParameterizedTest
+    @EnumSource(EmptyOrBlankInputArgument::class)
+    fun `should throw exception when input argument is empty or blank`(scenario: EmptyOrBlankInputArgument) {
+        //given
+        val cronParser = CronParserFactory.create()
+
+        //expect
+        assertThrows<EmptyOrBlankArgumentException> {
+            cronParser.parseAndPrint(scenario.inputArgument)
+        }
+    }
+
+    enum class EmptyOrBlankInputArgument(val inputArgument: Array<String>) {
+        EMPTY_INPUT_ARGUMENT(arrayOf("")),
+        BLANK_INPUT_ARGUMENT(arrayOf("    ")),
+    }
+
+    @ParameterizedTest
+    @EnumSource(WrongInputArgumentQuantity::class)
+    fun `should throw exception when input argument quantity is wrong`(scenario: WrongInputArgumentQuantity) {
+        //given
+        val cronParser = CronParserFactory.create()
+
+        //expect
+        assertThrows<WrongArgumentSizeException> {
+            cronParser.parseAndPrint(scenario.inputArgument)
+        }
+    }
+
+    enum class WrongInputArgumentQuantity(val inputArgument: Array<String>) {
+        EMPTY_ARRAY_INPUT_ARGUMENT(emptyArray()),
+        TWO_INPUT_ARGUMENTS(arrayOf("1 3 12 2 1 2 /path/command", "1 3 12 2 1 2 /path/newCommand")),
+
     }
 }

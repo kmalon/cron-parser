@@ -9,6 +9,5 @@ class CronFormatRecognizer(
         }
 }
 
-//todo test
 class NotSupportedCronFormat(message: String = "Not supported cron parser format.") :
     ParserException(message)

@@ -11,7 +11,8 @@ class StandardCronFormat {
         STANDARD_FORMAT_REGEX.matches(argument.value)
 
     fun get(argument: RawParserArgument): List<String> =
-        STANDARD_FORMAT_REGEX.find(argument.value)?.groupValues?.drop(1) ?: throw NotFoundArgumentsException()
+        STANDARD_FORMAT_REGEX.find(argument.value)?.groupValues?.drop(1)
+            ?: throw NotFoundArgumentsException(argument.value)
 }
 
 class StandardCronParser(
@@ -102,11 +103,9 @@ data class ParsedArguments(
     val timeArguments: ParsedTimeArguments,
     val otherArguments: ParsedOtherArguments,
 ) {
-    //TODO exception test
     fun getFor(timeArgumentType: TimeArgumentType): Argument =
         timeArguments.value[timeArgumentType] ?: throw NotFoundTimeArgumentException(timeArgumentType)
 
-    //TODO exception test
     fun getFor(otherArgumentType: OtherArgumentType): Argument =
         otherArguments.value[otherArgumentType] ?: throw NotFoundOtherArgumentException(otherArgumentType)
 }
@@ -268,7 +267,10 @@ class UnrecognizedArgumentException(
 ) :
     ParserException(message)
 
-class NotFoundArgumentsException(message: String = "Can not found any arguments in provided application invitation") :
+class NotFoundArgumentsException(
+    argument: String,
+    message: String = "Can not parse argument: $argument"
+) :
     ParserException(message)
 
 class NotFoundTimeArgumentException(

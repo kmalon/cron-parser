@@ -15,6 +15,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.14")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }
 
 tasks.test {

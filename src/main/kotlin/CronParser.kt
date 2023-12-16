@@ -22,11 +22,9 @@ class RawParserArgument(
         }
 }
 
-//todo test
 class EmptyOrBlankArgumentException(message: String = "Application argument should not be blank or empty.") :
     ParserException(message)
 
-//todo test
 class WrongArgumentSizeException(message: String = "Application argument should be passed as one argument.") :
     ParserException(message)
 
