@@ -1,3 +1,6 @@
+import cronparser.ConsolePrinter
+import cronparser.Printer
+
 class TestConsolePrinter(
     private val printer: Printer = ConsolePrinter()
 ) : Printer {
