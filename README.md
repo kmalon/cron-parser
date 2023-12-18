@@ -1,4 +1,7 @@
 # RUN
+
+make sure you have at least java 11
+
 ## using gradle
 >./gradlew run --args="\"set_args\""
 

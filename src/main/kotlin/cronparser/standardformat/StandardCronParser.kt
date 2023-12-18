@@ -91,7 +91,7 @@ class ArgumentFactory {
 
     private fun createOtherArgument(argument: String): Argument =
         when {
-            CommandArgument.isEligibleFor(argument) -> CommandArgument(argument)
+            CommandArgument.isEligibleFor() -> CommandArgument(argument)
             else -> throw UnrecognizedArgumentException(argument)
         }
 }

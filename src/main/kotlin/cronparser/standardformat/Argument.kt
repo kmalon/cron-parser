@@ -146,7 +146,7 @@ class CommandArgument(
         values
 
     companion object {
-        fun isEligibleFor(argument: String): Boolean =
+        fun isEligibleFor(): Boolean =
             true
     }
 }
